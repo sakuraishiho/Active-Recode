@@ -1,27 +1,35 @@
 class ExercisesController < ApplicationController
   def exercise1
-    # 【要件】注文されていないすべての料理を返すこと
-    #   * left_outer_joinsを使うこと
-    @foods = Food
+    # 注文されていないすべての料理を返す
+    @foods = Food.left_outer_joins(:order_foods).where(order_foods: { id: nil })
   end
 
   def exercise2
-    # 【要件】注文されていない料理を提供しているすべてのお店を返すこと
-    #   * left_outer_joinsを使うこと
-    @shops = Shop
+    # 注文されていない料理を提供しているすべてのお店を返す
+    # まず、注文されていない料理を取得
+    foods = Food.left_outer_joins(:order_foods).where(order_foods: { id: nil })
+    
+    # 次に、それらの料理を提供しているお店を取得
+    @shops = Shop.left_outer_joins(:foods).where(foods: { id: foods.pluck(:id) })
   end
 
   def exercise3 
-    # 【要件】配達先の一番多い住所を返すこと
-    #   * joinsを使うこと
-    #   * 取得したAddressのインスタンスにorders_countと呼びかけると注文の数を返すこと
-    @address = Address
+    # 配達先の一番多い住所を返す
+    @address = Address.joins(:orders)
+                      .group('addresses.id')
+                      .order('COUNT(orders.id) DESC')
+                      .limit(1)
+                      .first
   end
 
   def exercise4 
-    # 【要件】一番お金を使っている顧客を返すこと
-    #   * joinsを使うこと
-    #   * 取得したCustomerのインスタンスにfoods_price_sumと呼びかけると合計金額を返すこと
-    @customer = Customer
+    # 一番お金を使っている顧客を返す
+    @customer = Customer.joins(:orders)
+                        .select('customers.*, SUM(order_foods.price) AS total_price')
+                        .joins(orders: :order_foods)
+                        .group('customers.id')
+                        .order('total_price DESC')
+                        .limit(1)
+                        .first
   end
 end
