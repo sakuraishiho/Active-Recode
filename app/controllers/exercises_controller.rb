@@ -11,9 +11,6 @@ class ExercisesController < ApplicationController
   
     # 注文されていない料理を提供しているお店を取得
     @shops = Shop.left_outer_joins(:foods).where(foods: { id: food_ids }).distinct
-  
-    # `left_outer_joins`を使用していることを確認するために、ここでも呼び出しておく
-    Shop.left_outer_joins(:foods)
   end
 
   def exercise3 
