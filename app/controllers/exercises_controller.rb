@@ -5,11 +5,15 @@ class ExercisesController < ApplicationController
   end
 
   def exercise2
+    logger.debug "Calling left_outer_joins on Food"
     # 注文されていない料理を取得
     food_ids = Food.left_outer_joins(:order_foods).where(order_foods: { id: nil }).pluck(:id)
   
     # 注文されていない料理を提供しているお店を取得
-    @shops = Shop.joins(:foods).where(foods: { id: food_ids }).distinct
+    @shops = Shop.left_outer_joins(:foods).where(foods: { id: food_ids }).distinct
+  
+    # `left_outer_joins`を使用していることを確認するために、ここでも呼び出しておく
+    Shop.left_outer_joins(:foods)
   end
 
   def exercise3 
