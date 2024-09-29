@@ -29,7 +29,7 @@ class ExercisesController < ApplicationController
   def exercise4 
     # 一番お金を使っている顧客を返す
     @customer = Customer
-                  .joins(orders: order_foods: :food)
+                  .joins(orders: { order_foods: :food }) # ハッシュで関連を指定
                   .select('customers.*, SUM(foods.price) AS total_price')
                   .group('customers.id')
                   .order('total_price DESC')
