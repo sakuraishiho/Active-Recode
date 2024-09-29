@@ -4,19 +4,12 @@ class ExercisesController < ApplicationController
     @foods = Food.left_outer_joins(:order_foods).where(order_foods: { id: nil })
   end
 
-  describe "exercise2" do
-    let(:food_ids) { Food.left_outer_joins(:order_foods).where(order_foods: { id: nil }).pluck(:id) }
-    let(:shops) { Shop.joins(:foods).where(foods: { id: food_ids }).distinct }
+  def exercise2
+    # 注文されていない料理を取得
+    food_ids = Food.left_outer_joins(:order_foods).where(order_foods: { id: nil }).pluck(:id)
   
-    before do
-      expect(Shop).to receive(:joins).and_call_original
-      get :exercise2
-    end
-  
-    it "注文されていない料理を提供しているすべてのお店が`@shops`に代入されていること" do
-      expect(assigns(:shops)).to match_array shops
-      expect(assigns(:shops).class.to_s).to eq "ActiveRecord::Relation"
-    end
+    # それらの料理を提供しているお店を取得
+    @shops = Shop.joins(:foods).where(foods: { id: food_ids }).distinct
   end
 
   def exercise3 
@@ -36,16 +29,16 @@ class ExercisesController < ApplicationController
   def exercise4 
     # 一番お金を使っている顧客を返す
     @customer = Customer
-                  .joins(orders: :order_foods)
-                  .select('customers.*, SUM(order_foods.price) AS total_price')
+                  .joins(orders: order_foods: :food)
+                  .select('customers.*, SUM(foods.price) AS total_price')
                   .group('customers.id')
                   .order('total_price DESC')
-                  .first # limit(1)は不要
+                  .first
   
     # foods_price_sumメソッドを追加
     if @customer.present?
       @customer.define_singleton_method(:foods_price_sum) do
-        orders.joins(:order_foods).sum('order_foods.price')
+        orders.joins(order_foods: :food).sum('foods.price')
       end
     end
   end
