@@ -8,8 +8,8 @@ class ExercisesController < ApplicationController
     # 注文されていない料理を取得
     food_ids = Food.left_outer_joins(:order_foods).where(order_foods: { id: nil }).pluck(:id)
   
-    # それらの料理を提供しているお店を取得
-    @shops = Shop.joins(foods: :order_foods).where(order_foods: { food_id: food_ids }).distinct
+    # 注文されていない料理を提供しているお店を取得
+    @shops = Shop.joins(:foods).where(foods: { id: food_ids }).distinct
   end
 
   def exercise3 
